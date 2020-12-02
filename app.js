@@ -10,7 +10,7 @@ app.use(bodyParser({
 }));
 
 var jwt = require('jsonwebtoken');
-const allowpage = ['/mweb/enduser/jsapi_ticket','/mweb/enduser/login','/mweb/enduser/search_merchant_shop']
+const allowpage = ['/mweb/enduser/svcno/jsapi_ticket','/mweb/enduser/svcno/login','/mweb/enduser/search_merchant_shop']
 function loginFilter(ctx) {
     body = ctx.request.body
     let url = ctx.originalUrl
