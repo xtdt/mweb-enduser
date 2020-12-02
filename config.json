@@ -1,0 +1,9 @@
+{
+  "port":"18080",
+  "orderAddr":"localhost:18081",
+  "wechatAddr":"localhost:18085",
+  "merchantAddr":"localhost:18086",
+  "userAddr":"localhost:18083",
+  "deliveryAddr":"localhost:18089",
+  "svcno_enduser_secret":"cdt-svcno-enduser-test"
+}
