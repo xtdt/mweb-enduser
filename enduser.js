@@ -289,7 +289,7 @@ router.post('/enduser/get_user_addr', async ctx => {
         req = {userId:ctx.jwt.userId,lat:jsonObj.lat,lng:jsonObj.lng}
         resp = await userApiGetUserAddrByLocation(req)
       } else if (jsonObj.addrId) {
-        req = {userId:ctx.jwt.userId,addrId:jsonObj.addrId}
+        req = {addrId:jsonObj.addrId}
         resp = await userApiGetUserAddrByAddrId(req)
       }else {
         req = {userId:ctx.jwt.userId}
@@ -351,7 +351,7 @@ router.post('/enduser/get_deliveryinfo', async ctx => {
         ctx.set("Content-Type", "application/json")
         return
       }
-      req = {userId:ctx.jwt.userId,addrId:orderResp.order.addrId}
+      req = {addrId:orderResp.order.addrId}
       userAddrResp = await userApiGetUserAddrByAddrId(req)
       req = {merchantShopId: orderResp.order.merchantShopId}
       merchantResp = await merchantApiGetMerchantShopByMerchantShopId(req)
