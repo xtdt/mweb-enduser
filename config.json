@@ -5,5 +5,5 @@
   "merchantAddr":"localhost:18086",
   "userAddr":"localhost:18083",
   "deliveryAddr":"localhost:18089",
-  "svcno_enduser_secret":"cdt-svcno-enduser-test"
+  "enduser_secret":"cdt-enduser-test"
 }

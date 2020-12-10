@@ -199,7 +199,7 @@ router.post('/enduser/get_order_state', async ctx => {
       var req = {orderId: jsonObj.orderId};
       var resp = await orderApiGetOrderByOrderId(req)
       ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:0,data:{state:resp.order.state,subState:resp.order.subState}})
+      ctx.body = JSON.stringify({code:0,data:{state:resp.order.state,subState:resp.order.subState,tags:resp.order.tags}})
     } catch (e){
       console.log(e);
       ctx.set("Content-Type", "application/json")
