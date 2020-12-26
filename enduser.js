@@ -88,15 +88,21 @@ const userApiGetUserAddrByAddrId = promisify(userApi.GetUserAddrByAddrId).bind(u
 const userApiGetUserAddrByLocation = promisify(userApi.GetUserAddrByLocation).bind(userApi);
 const userApiGetUserByOpenId = promisify(userApi.GetUserByOpenId).bind(userApi);
 const userApiCreateUserAddr = promisify(userApi.CreateUserAddr).bind(userApi);
+
 const merchantApiGetMerchantShopByMerchantShopId = promisify(merchantApi.GetMerchantShopByMerchantShopId).bind(merchantApi);
 const merchantApiSearchMerchantShop = promisify(merchantApi.SearchMerchantShop).bind(merchantApi);
+
 const orderApiCheckOrderPaid = promisify(orderApi.CheckOrderPaid).bind(orderApi);
 const orderApiGetOrderByOrderId = promisify(orderApi.GetOrderByOrderId).bind(orderApi);
 const orderApiGetOrdersByUserId = promisify(orderApi.GetOrdersByUserId).bind(orderApi);
 const orderApiPrepareOrder = promisify(orderApi.PrepareOrder).bind(orderApi);
 const orderApiCreateOrder = promisify(orderApi.CreateOrder).bind(orderApi);
+const orderApiUserSetDeliveried = promisify(orderApi.UserSetDeliveried).bind(orderApi);
+const orderApiUserSetCanceled = promisify(orderApi.UserSetCanceled).bind(orderApi);
+
 const wechatApiGetSvcnoEnduserJsapiTicket = promisify(wechatApi.GetSvcnoEnduserJsapiTicket).bind(wechatApi);
 const wechatApiSvcnoEnduserLogin = promisify(wechatApi.SvcnoEnduserLogin).bind(wechatApi);
+
 const deliveryApiGetDeliveryLocation = promisify(deliveryApi.GetDeliveryLocation).bind(deliveryApi);
 
 router.post('/enduser/get_merchant_shop', async ctx => {
@@ -369,7 +375,37 @@ router.post('/enduser/get_deliveryinfo', async ctx => {
     } catch (e){
       console.log(e);
       ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:1,msg:'创建或保存user addr失败'})
+      ctx.body = JSON.stringify({code:1,msg:'获取骑手信息失败'})
+    }
+})
+
+router.post('/enduser/set_deliveried', async ctx => {
+    body = ctx.request.body;
+    var jsonObj = JSON.parse(body);
+    try {
+      var req = {userId: ctx.jwt.userId, orderId: jsonObj.orderId};
+      orderResp = await orderApiUserSetDeliveried(req)
+      ctx.set("Content-Type", "application/json")
+      ctx.body = JSON.stringify({code:0,data:orderResp})
+    } catch (e){
+      console.log(e);
+      ctx.set("Content-Type", "application/json")
+      ctx.body = JSON.stringify({code:1,msg:'设置已完成失败'})
+    }
+})
+
+router.post('/enduser/set_canceled', async ctx => {
+    body = ctx.request.body;
+    var jsonObj = JSON.parse(body);
+    try {
+      var req = {userId: ctx.jwt.userId, orderId: jsonObj.orderId};
+      orderResp = await orderApiUserSetCanceled(req)
+      ctx.set("Content-Type", "application/json")
+      ctx.body = JSON.stringify({code:0,data:orderResp})
+    } catch (e){
+      console.log(e);
+      ctx.set("Content-Type", "application/json")
+      ctx.body = JSON.stringify({code:1,msg:'设置取消失败'})
     }
 })
 
