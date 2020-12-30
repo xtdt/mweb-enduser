@@ -19,16 +19,16 @@ function loginFilter(ctx) {
     if (allowpage.indexOf(uri) > -1) {
         console.info('passthrough')
     } else {
-    	var token = ctx.headers.token
-	    console.log("token: ",token)
-	    try{
-	    	var decoded = jwt.verify(token, config.enduser_secret)
-	    	ctx.jwt = decoded
-	    	console.log("decoded: ",decoded)
-		} catch (e){
-			console.log("failed to valid jwt: ",e)
-			return false
-		}
+       var token = ctx.headers.token
+       console.log("token: ",token)
+       try{
+           var decoded = jwt.verify(token, config.enduser_secret)
+           ctx.jwt = decoded
+           console.log("decoded: ",decoded)
+       } catch (e){
+           console.log("failed to valid jwt: ",e)
+           return false
+       }
     }
     return true
 }

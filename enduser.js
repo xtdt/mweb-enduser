@@ -279,7 +279,7 @@ router.post('/enduser/svcno/login', async ctx => {
       }
       ctx.set("Content-Type", "application/json")
       var key = randomstring.generate({length: 8,charset: 'alphabetic'})
-      ctx.body = JSON.stringify({code:0,data:{token:jwt.sign({ userId: user.userId, key: key }, config.enduser_secret,{ expiresIn: '365d' })}})
+      ctx.body = JSON.stringify({code:0,data:{userId: user.userId, token:jwt.sign({ userId: user.userId, key: key }, config.enduser_secret,{ expiresIn: '365d' })}})
     } catch (e){
       console.log(e);
       ctx.set("Content-Type", "application/json")
@@ -412,9 +412,14 @@ router.post('/enduser/set_canceled', async ctx => {
 
 function propagateZipkinHeaders(ctx) {
     var meta = new grpc.Metadata()
-    meta.add('x-b3-traceid', ctx.get('x-b3-traceid'))
-    meta.add('x-b3-spanid', randomstring.generate({length: 16,charset: 'hex'}))
-    meta.add('x-b3-parentspanid', ctx.get('x-b3-spanid'))
+    for (var key in ctx.header) {
+      if(key.startsWith('baggage-')){
+        meta.add(key, ctx.header[key])
+      }
+      if(key.startsWith('x-b3-')){
+        meta.add(key, ctx.header[key])
+      }
+    }
     return meta
 }
 
