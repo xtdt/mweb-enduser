@@ -128,7 +128,19 @@ router.post('/enduser/search_merchant_shop', async ctx => {
       var req = {lat: jsonObj.lat, lng: jsonObj.lng, name: jsonObj.name, curPage: jsonObj.curPage };
       var resp = await merchantApiSearchMerchantShop(req,propagateZipkinHeaders(ctx))
       console.log(resp);
+      var now = new Date()
+      var datestr = now.toLocaleDateString()
+      console.log('datestr: '+datestr)
       for(var i=0;i<resp.merchantShops.length;i++){
+        if(resp.merchantShops[i].businessHours){
+          var tmp = resp.merchantShops[i].businessHours.split("-")
+          start = Date.parse(datestr + " " + tmp[0])
+          end = Date.parse(datestr + " " + tmp[1])
+          resp.merchantShops[i].isInBusiness = false
+          if(start <= now.getTime() && now.getTime() <= end) {
+            resp.merchantShops[i].isInBusiness = true
+          }
+        }
         if(parseInt(resp.merchantShops[i].distance)<1000){
           resp.merchantShops[i].distance = resp.merchantShops[i].distance + 'm'
         } else {
