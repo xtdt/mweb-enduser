@@ -247,7 +247,7 @@ router.post('/enduser/create_order', async ctx => {
     body = ctx.request.body;
     var jsonObj = JSON.parse(body);
     try {
-      var req = {userId: ctx.jwt.userId, from: jsonObj.from, addrId: jsonObj.addrId, prepareId: jsonObj.prepareId};
+      var req = {userId: ctx.jwt.userId, from: jsonObj.from, addrId: jsonObj.addrId, prepareId: jsonObj.prepareId, comments: jsonObj.comments};
       var resp = await orderApiCreateOrder(req,propagateZipkinHeaders(ctx))
       ctx.set("Content-Type", "application/json")
       var r = {orderId: resp.order.orderId, userPrice: resp.order.userPrice, originUserPrice: resp.order.originUserPrice}
