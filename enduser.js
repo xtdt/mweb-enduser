@@ -270,19 +270,17 @@ router.post('/svcno/login', async ctx => {
 })
 
 router.post('/get_user_addr', async ctx => {
-    var body = ctx.request.body;
+    var body = ctx.request.body
     var req = {}
     var resp = {}
-    try {
-      var jsonObj = JSON.parse(body);
-      if (jsonObj.lat&&jsonObj.lng){
-        req = {userId:ctx.jwt.userId,lat:jsonObj.lat,lng:jsonObj.lng}
-        resp = await userApiGetUserAddrByLocation(req,propagateZipkinHeaders(ctx))
-      } else if (jsonObj.addrId) {
-        req = {addrId:jsonObj.addrId}
-        resp = await userApiGetUserAddrByAddrId(req,propagateZipkinHeaders(ctx))
-      }
-    } catch (e){
+    var jsonObj = JSON.parse(body);
+    if (jsonObj.lat&&jsonObj.lng){
+      req = {userId:ctx.jwt.userId,lat:jsonObj.lat,lng:jsonObj.lng}
+      resp = await userApiGetUserAddrByLocation(req,propagateZipkinHeaders(ctx))
+    } else if (jsonObj.addrId) {
+      req = {addrId:jsonObj.addrId}
+      resp = await userApiGetUserAddrByAddrId(req,propagateZipkinHeaders(ctx))
+    } else {
       req = {userId:ctx.jwt.userId}
       resp = await userApiGetUserAddrByUserId(req,propagateZipkinHeaders(ctx))
     }
