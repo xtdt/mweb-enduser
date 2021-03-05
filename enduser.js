@@ -2,7 +2,7 @@ const Koa = require('koa');
 const axios = require('axios');
 const Router = require('koa-router');
 const router = new Router({
-  prefix: '/mweb'
+  prefix: '/mweb/enduser'
 });
 const sha1 = require('sha1');
 const parser = require('fast-xml-parser');
@@ -125,373 +125,254 @@ const activityApiActivityEnabled = promisify(activityApi.ActivityEnabled).bind(a
 const activityApiActivity1CreateDetail = promisify(activityApi.Activity1CreateDetail).bind(activityApi);
 const activityApiActivity1SetDetailOrderId = promisify(activityApi.Activity1SetDetailOrderId).bind(activityApi);
 
-router.post('/enduser/get_merchant_shop', async ctx => {
+router.post('/get_merchant_shop', async ctx => {
     var body = ctx.request.body;
     var jsonObj = JSON.parse(body);
-    try{
-      var req = {merchantShopId: jsonObj.merchantShopId}
-      var resp = await merchantApiGetMerchantShopByMerchantShopId(req,propagateZipkinHeaders(ctx))
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:0,data:{name:resp.merchantShop.name}})
-    } catch (e){
-      console.log(e);
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:1,msg:e.details})
-    }
+    var req = {merchantShopId: jsonObj.merchantShopId}
+    var resp = await merchantApiGetMerchantShopByMerchantShopId(req,propagateZipkinHeaders(ctx))
+    ctx.body = JSON.stringify({code:0,data:{name:resp.merchantShop.name}})
 });
 
-router.post('/enduser/search_merchant_shop', async ctx => {
+router.post('/search_merchant_shop', async ctx => {
     var body = ctx.request.body;
     var jsonObj = JSON.parse(body);
-    try{
-      var req = {lat: jsonObj.lat, lng: jsonObj.lng, name: jsonObj.name, curPage: jsonObj.curPage };
-      var resp = await merchantApiSearchMerchantShop(req,propagateZipkinHeaders(ctx))
-      console.log(resp);
-      var now = new Date()
-      var datestr = now.toLocaleDateString()
-      console.log('datestr: '+datestr)
-      for(var i=0;i<resp.merchantShops.length;i++){
-        if(resp.merchantShops[i].businessHours){
-          var tmp = resp.merchantShops[i].businessHours.split("-")
-          var start = Date.parse(datestr + " " + tmp[0])
-          var end = Date.parse(datestr + " " + tmp[1])
-          resp.merchantShops[i].isInBusiness = false
-          if(start <= now.getTime() && now.getTime() <= end) {
-            resp.merchantShops[i].isInBusiness = true
-          }
-        }
-        if(parseInt(resp.merchantShops[i].distance)<1000){
-          resp.merchantShops[i].distance = resp.merchantShops[i].distance + 'm'
-        } else {
-          resp.merchantShops[i].distance = (parseInt(resp.merchantShops[i].distance)/1000).toFixed(1) + 'km'
+    var req = {lat: jsonObj.lat, lng: jsonObj.lng, name: jsonObj.name, curPage: jsonObj.curPage };
+    var resp = await merchantApiSearchMerchantShop(req,propagateZipkinHeaders(ctx))
+    console.log(resp);
+    var now = new Date()
+    var datestr = now.toLocaleDateString()
+    console.log('datestr: '+datestr)
+    for(var i=0;i<resp.merchantShops.length;i++){
+      if(resp.merchantShops[i].businessHours){
+        var tmp = resp.merchantShops[i].businessHours.split("-")
+        var start = Date.parse(datestr + " " + tmp[0])
+        var end = Date.parse(datestr + " " + tmp[1])
+        resp.merchantShops[i].isInBusiness = false
+        if(start <= now.getTime() && now.getTime() <= end) {
+          resp.merchantShops[i].isInBusiness = true
         }
       }
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:0,data:resp})
-    } catch (e){
-      console.log(e);
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:1,msg:e.details})
+      if(parseInt(resp.merchantShops[i].distance)<1000){
+        resp.merchantShops[i].distance = resp.merchantShops[i].distance + 'm'
+      } else {
+        resp.merchantShops[i].distance = (parseInt(resp.merchantShops[i].distance)/1000).toFixed(1) + 'km'
+      }
     }
+    ctx.body = JSON.stringify({code:0,data:resp})
 });
 
-router.post('/enduser/check_order_paid', async ctx => {
+router.post('/check_order_paid', async ctx => {
     var body = ctx.request.body;
     var jsonObj = JSON.parse(body);
-    try{
-      var req = {orderId: jsonObj.orderId};
-      var resp = await orderApiCheckOrderPaid(req,propagateZipkinHeaders(ctx))
-      console.log(resp)
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:0,data:resp})
-    } catch (e){
-      console.log(e);
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:1,msg:e.details})
-    }
+    var req = {orderId: jsonObj.orderId};
+    var resp = await orderApiCheckOrderPaid(req,propagateZipkinHeaders(ctx))
+    console.log(resp)
+    ctx.body = JSON.stringify({code:0,data:resp})
 })
 
-router.post('/enduser/get_orderinfo', async ctx => {
+router.post('/get_orderinfo', async ctx => {
     var body = ctx.request.body;
     var jsonObj = JSON.parse(body);
-    try{
-      var req = {orderId: jsonObj.orderId};
-      var resp = await orderApiGetOrderByOrderId(req,propagateZipkinHeaders(ctx))
-      console.log(resp);
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:0,data:resp.order})
-    } catch (e){
-      console.log(e);
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:1,msg:e.details})
-    }
+    var req = {orderId: jsonObj.orderId};
+    var resp = await orderApiGetOrderByOrderId(req,propagateZipkinHeaders(ctx))
+    console.log(resp);
+    ctx.body = JSON.stringify({code:0,data:resp.order})
 })
 
-router.post('/enduser/get_orderinfos', async ctx => {
+router.post('/get_orderinfos', async ctx => {
     var body = ctx.request.body;
     var jsonObj = JSON.parse(body);
-    try {
-      var req = {userId: ctx.jwt.userId, curPage: jsonObj.curPage, pageSize: jsonObj.pageSize};
-      var resp = await orderApiGetOrdersByUserId(req,propagateZipkinHeaders(ctx))
-      var orders = []
-      for(var i=0;i<resp.orders.length;i++){
-        var merchantReq = {merchantShopId:  resp.orders[i].merchantShopId}
-        var merchantResp = await merchantApiGetMerchantShopByMerchantShopId(merchantReq,propagateZipkinHeaders(ctx))
-        var o = resp.orders[i]
-        orders.push({orderId:o.orderId,merchantShopName:merchantResp.merchantShop.name,userPrice:o.userPrice,originUserPrice:o.originUserPrice,createdAt:o.createdAt,state:o.state})
-      }
-      resp.orders = orders
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:0,data:resp})
-    } catch (e){
-      console.log(e);
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:1,msg:e.details})
+    var req = {userId: ctx.jwt.userId, curPage: jsonObj.curPage, pageSize: jsonObj.pageSize};
+    var resp = await orderApiGetOrdersByUserId(req,propagateZipkinHeaders(ctx))
+    var orders = []
+    for(var i=0;i<resp.orders.length;i++){
+      var merchantReq = {merchantShopId:  resp.orders[i].merchantShopId}
+      var merchantResp = await merchantApiGetMerchantShopByMerchantShopId(merchantReq,propagateZipkinHeaders(ctx))
+      var o = resp.orders[i]
+      orders.push({orderId:o.orderId,merchantShopName:merchantResp.merchantShop.name,userPrice:o.userPrice,originUserPrice:o.originUserPrice,createdAt:o.createdAt,state:o.state})
     }
+    resp.orders = orders
+    ctx.body = JSON.stringify({code:0,data:resp})
 })
 
-router.post('/enduser/get_order_state', async ctx => {
+router.post('/get_order_state', async ctx => {
     var body = ctx.request.body;
     var jsonObj = JSON.parse(body);
-    try{
-      var req = {orderId: jsonObj.orderId};
-      var resp = await orderApiGetOrderByOrderId(req,propagateZipkinHeaders(ctx))
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:0,data:{state:resp.order.state,subState:resp.order.subState,tags:resp.order.tags}})
-    } catch (e){
-      console.log(e);
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:1,msg:e.details})
-    }
+    var req = {orderId: jsonObj.orderId};
+    var resp = await orderApiGetOrderByOrderId(req,propagateZipkinHeaders(ctx))
+    ctx.body = JSON.stringify({code:0,data:{state:resp.order.state,subState:resp.order.subState,tags:resp.order.tags}})
 })
 
-router.post('/enduser/prepare_order', async ctx => {
+router.post('/prepare_order', async ctx => {
     var body = ctx.request.body;
     var jsonObj = JSON.parse(body);
-    try {
-      var req = {userId: ctx.jwt.userId, addrId: jsonObj.addrId, pics: jsonObj.pics, merchantShopId: jsonObj.merchantShopId};
-      var resp = await orderApiPrepareOrder(req,propagateZipkinHeaders(ctx))
-      console.log(resp)
-      ctx.set("Content-Type", "application/json")
-      if(resp.result=='not_enough_budget'){
-        ctx.body = JSON.stringify({code:0,data:{result: resp.result}})
-      } else if(resp.result=='succeed'){
-        var r = {result: resp.result, prepareId: resp.prepareOrderInfo.prepareId, userPrice: resp.prepareOrderInfo.userPrice, originUserPrice: resp.prepareOrderInfo.originUserPrice}
-        req = {activityId: 1};
-        var activityResp = await activityApiActivityEnabled(req,propagateZipkinHeaders(ctx))
-        if(activityResp.enabled){
-          req = {userId: ctx.jwt.userId}
-          var activityRecommenderResp = await activityApiActivity1GetRecommender(req,propagateZipkinHeaders(ctx))
-          //如果有推荐人，且其推荐人获得的彩蛋数量小于5个
-          console.log(activityRecommenderResp)
-          if(activityRecommenderResp.recommender&&parseInt(activityRecommenderResp.recommender.eggsAcquired)<5){
-            //原来的彩蛋
-            var eggPrice = parseInt(r.originUserPrice) - parseInt(r.userPrice)
-            //需要将彩蛋分20%给推荐人
-            var recommenderPrice = Math.floor(eggPrice * 0.2)
-            //意味着支付价提高20%（本质上就是多支付点儿钱给到推荐人）
-            r.userPrice = parseInt(r.userPrice) + parseInt(recommenderPrice)
-            req = {userId: ctx.jwt.userId, recommenderId:activityRecommenderResp.recommender.recommenderId,recommenderPrice:recommenderPrice,prepareId:r.prepareId};
-            var activityCreateDetailResp = await activityApiActivity1CreateDetail(req,propagateZipkinHeaders(ctx))
-          }
+    var req = {userId: ctx.jwt.userId, addrId: jsonObj.addrId, pics: jsonObj.pics, merchantShopId: jsonObj.merchantShopId};
+    var resp = await orderApiPrepareOrder(req,propagateZipkinHeaders(ctx))
+    console.log(resp)
+    if(resp.result=='not_enough_budget'){
+      ctx.body = JSON.stringify({code:0,data:{result: resp.result}})
+    } else if(resp.result=='succeed'){
+      var r = {result: resp.result, prepareId: resp.prepareOrderInfo.prepareId, userPrice: resp.prepareOrderInfo.userPrice, originUserPrice: resp.prepareOrderInfo.originUserPrice}
+      req = {activityId: 1};
+      var activityResp = await activityApiActivityEnabled(req,propagateZipkinHeaders(ctx))
+      if(activityResp.enabled){
+        req = {userId: ctx.jwt.userId}
+        var activityRecommenderResp = await activityApiActivity1GetRecommender(req,propagateZipkinHeaders(ctx))
+        //如果有推荐人，且其推荐人获得的彩蛋数量小于5个
+        console.log(activityRecommenderResp)
+        if(activityRecommenderResp.recommender&&parseInt(activityRecommenderResp.recommender.eggsAcquired)<5){
+          //原来的彩蛋
+          var eggPrice = parseInt(r.originUserPrice) - parseInt(r.userPrice)
+          //需要将彩蛋分20%给推荐人
+          var recommenderPrice = Math.floor(eggPrice * 0.2)
+          //意味着支付价提高20%（本质上就是多支付点儿钱给到推荐人）
+          r.userPrice = parseInt(r.userPrice) + parseInt(recommenderPrice)
+          req = {userId: ctx.jwt.userId, recommenderId:activityRecommenderResp.recommender.recommenderId,recommenderPrice:recommenderPrice,prepareId:r.prepareId};
+          var activityCreateDetailResp = await activityApiActivity1CreateDetail(req,propagateZipkinHeaders(ctx))
         }
-        ctx.body = JSON.stringify({code:0,data:r})
       }
-    } catch (e){
-      console.log(e);
-      ctx.set("Content-Type", "application/json")
-      //ctx.body = JSON.stringify({code:1,msg:'获取优惠价格失败'})
-      ctx.body = JSON.stringify({code:1,msg:e.details})
-    }
-})
-
-router.post('/enduser/create_order', async ctx => {
-    var body = ctx.request.body;
-    var jsonObj = JSON.parse(body);
-    try {
-      var req = {userId: ctx.jwt.userId, from: jsonObj.from, addrId: jsonObj.addrId, prepareId: jsonObj.prepareId, comments: jsonObj.comments};
-      var resp = await orderApiCreateOrder(req,propagateZipkinHeaders(ctx))
-      ctx.set("Content-Type", "application/json")
-      var r = {orderId: resp.order.orderId, userPrice: resp.order.userPrice, originUserPrice: resp.order.originUserPrice}
       ctx.body = JSON.stringify({code:0,data:r})
-    } catch (e){
-      console.log(e);
-      ctx.set("Content-Type", "application/json")
-      //ctx.body = JSON.stringify({code:1,msg:'创建订单失败'})
-      ctx.body = JSON.stringify({code:1,msg:e.details})
     }
 })
 
-router.get('/enduser/svcno/jsapi_ticket', async ctx => {
+router.post('/create_order', async ctx => {
+    var body = ctx.request.body;
+    var jsonObj = JSON.parse(body);
+    var req = {userId: ctx.jwt.userId, from: jsonObj.from, addrId: jsonObj.addrId, prepareId: jsonObj.prepareId, comments: jsonObj.comments};
+    var resp = await orderApiCreateOrder(req,propagateZipkinHeaders(ctx))
+    var r = {orderId: resp.order.orderId, userPrice: resp.order.userPrice, originUserPrice: resp.order.originUserPrice}
+    ctx.body = JSON.stringify({code:0,data:r})
+})
+
+router.get('/svcno/jsapi_ticket', async ctx => {
     var req = {url:ctx.query.url}
-    try {
-      var resp = await wechatApiGetSvcnoEnduserJsapiTicket(req,propagateZipkinHeaders(ctx))
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:0,data:resp.ticketInfo})
-    } catch (e){
-      console.log(e);
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:1,msg:'获取jsapi ticket失败'})
-    }
+    var resp = await wechatApiGetSvcnoEnduserJsapiTicket(req,propagateZipkinHeaders(ctx))
+    ctx.body = JSON.stringify({code:0,data:resp.ticketInfo})
 })
 
-router.post('/enduser/svcno/login', async ctx => {
+router.post('/svcno/login', async ctx => {
     var body = ctx.request.body;
     var jsonObj = JSON.parse(body);
     var req = {code:jsonObj.code}
-    try {
-      var loginResp = await wechatApiSvcnoEnduserLogin(req)
-      req = { openId:loginResp.openId }
-      var userResp = await userApiGetUserByOpenId(req,propagateZipkinHeaders(ctx))
-      console.log('userApiGetUserByOpenId:',userResp);
-      var user = userResp.user
-      if(!user){
-        req = {from:'svcno_enduser',openId:loginResp.openId}
-        var createResp = await userApiCreateUser(req,propagateZipkinHeaders(ctx))
-        console.log('userApiCreateUser:',createResp);
-        user = createResp.user
-      }
-      ctx.set("Content-Type", "application/json")
-      var key = randomstring.generate({length: 8,charset: 'alphabetic'})
-      ctx.body = JSON.stringify({code:0,data:{userId: user.userId, token:jwt.sign({ userId: user.userId, key: key }, config.enduser_secret,{ expiresIn: '365d' })}})
-    } catch (e){
-      console.log(e);
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:1,msg:'获取openId失败'})
+    var loginResp = await wechatApiSvcnoEnduserLogin(req)
+    req = { openId:loginResp.openId }
+    var userResp = await userApiGetUserByOpenId(req,propagateZipkinHeaders(ctx))
+    console.log('userApiGetUserByOpenId:',userResp);
+    var user = userResp.user
+    if(!user){
+      req = {from:'svcno_enduser',openId:loginResp.openId}
+      var createResp = await userApiCreateUser(req,propagateZipkinHeaders(ctx))
+      console.log('userApiCreateUser:',createResp);
+      user = createResp.user
     }
+    var key = randomstring.generate({length: 8,charset: 'alphabetic'})
+    ctx.body = JSON.stringify({code:0,data:{userId: user.userId, token:jwt.sign({ userId: user.userId, key: key }, config.enduser_secret,{ expiresIn: '365d' })}})
 })
 
-router.post('/enduser/get_user_addr', async ctx => {
+router.post('/get_user_addr', async ctx => {
     var body = ctx.request.body;
-    var jsonObj = JSON.parse(body);
+    var req = {}
+    var resp = {}
     try {
-      var resp = {}
+      var jsonObj = JSON.parse(body);
       if (jsonObj.lat&&jsonObj.lng){
         req = {userId:ctx.jwt.userId,lat:jsonObj.lat,lng:jsonObj.lng}
         resp = await userApiGetUserAddrByLocation(req,propagateZipkinHeaders(ctx))
       } else if (jsonObj.addrId) {
         req = {addrId:jsonObj.addrId}
         resp = await userApiGetUserAddrByAddrId(req,propagateZipkinHeaders(ctx))
-      }else {
-        req = {userId:ctx.jwt.userId}
-        resp = await userApiGetUserAddrByUserId(req,propagateZipkinHeaders(ctx))
       }
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:0,data:resp})
     } catch (e){
-      console.log(e);
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:1,msg:'获取user addr失败'})
+      req = {userId:ctx.jwt.userId}
+      resp = await userApiGetUserAddrByUserId(req,propagateZipkinHeaders(ctx))
     }
+    ctx.body = JSON.stringify({code:0,data:resp})
 })
 
-router.post('/enduser/create_user_addr', async ctx => {
+router.post('/create_user_addr', async ctx => {
     var body = ctx.request.body;
     var jsonObj = JSON.parse(body);
-    try {
-      req = {
-          id:jsonObj.id,
-          userId:ctx.jwt.userId,
-          name:jsonObj.name,
-          gender:jsonObj.gender,
-          mobile:jsonObj.mobile,
-          addrShortName:jsonObj.addrShortName,
-          addr:jsonObj.addr,
-          roomNo:jsonObj.roomNo,
-          lat:jsonObj.lat,
-          lng:jsonObj.lng,
-          province:jsonObj.province,
-          district:jsonObj.district,
-          cityCode:jsonObj.cityCode,
-          adcode:jsonObj.adcode,
-          street:jsonObj.street,
-          streetNumber:jsonObj.streetNumber,
-          township:jsonObj.township
-      }
-      var resp = await userApiCreateUserAddr(req,propagateZipkinHeaders(ctx))
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:0,data:{id:resp.addr.id}})
-    } catch (e){
-      console.log(e);
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:1,msg:'创建或保存user addr失败'})
+    req = {
+        id:jsonObj.id,
+        userId:ctx.jwt.userId,
+        name:jsonObj.name,
+        gender:jsonObj.gender,
+        mobile:jsonObj.mobile,
+        addrShortName:jsonObj.addrShortName,
+        addr:jsonObj.addr,
+        roomNo:jsonObj.roomNo,
+        lat:jsonObj.lat,
+        lng:jsonObj.lng,
+        province:jsonObj.province,
+        district:jsonObj.district,
+        cityCode:jsonObj.cityCode,
+        adcode:jsonObj.adcode,
+        street:jsonObj.street,
+        streetNumber:jsonObj.streetNumber,
+        township:jsonObj.township
     }
+    var resp = await userApiCreateUserAddr(req,propagateZipkinHeaders(ctx))
+    ctx.body = JSON.stringify({code:0,data:{id:resp.addr.id}})
 })
 
-router.post('/enduser/get_deliveryinfo', async ctx => {
+router.post('/get_deliveryinfo', async ctx => {
     var body = ctx.request.body;
     var jsonObj = JSON.parse(body);
-    try {
-      var req = {orderId: jsonObj.orderId};
-      var orderResp = await orderApiGetOrderByOrderId(req,propagateZipkinHeaders(ctx))
-      if (orderResp.order.state !== 'delivery_accepted' && orderResp.order.state !== 'meal_ready' 
-        && orderResp.order.state !== 'deliverying' && orderResp.order.state  !== 'arrived'){
-        ctx.body = JSON.stringify({code:0,data:{
-          orderInfo:{state:orderResp.order.state,subState:orderResp.order.subState},
-        }})
-        ctx.set("Content-Type", "application/json")
-        return
-      }
-      req = {addrId:orderResp.order.addrId}
-      var userAddrResp = await userApiGetUserAddrByAddrId(req,propagateZipkinHeaders(ctx))
-      req = {merchantShopId: orderResp.order.merchantShopId}
-      var merchantResp = await merchantApiGetMerchantShopByMerchantShopId(req,propagateZipkinHeaders(ctx))
-      req = {deliveryId: orderResp.order.deliveryId}
-      var deliveryResp = await deliveryApiGetDeliveryLocation(req,propagateZipkinHeaders(ctx))
-      ctx.set("Content-Type", "application/json")
+    var req = {orderId: jsonObj.orderId};
+    var orderResp = await orderApiGetOrderByOrderId(req,propagateZipkinHeaders(ctx))
+    if (orderResp.order.state !== 'delivery_accepted' && orderResp.order.state !== 'meal_ready' 
+      && orderResp.order.state !== 'deliverying' && orderResp.order.state  !== 'arrived'){
       ctx.body = JSON.stringify({code:0,data:{
         orderInfo:{state:orderResp.order.state,subState:orderResp.order.subState},
-        poi:{
-          userAddrLngLat:{lat:userAddrResp.addr.lat,lng:userAddrResp.addr.lng},
-          deliveryLngLat:{lat:deliveryResp.location.lat,lng:deliveryResp.location.lng},
-          merchantLngLat:{lat:merchantResp.merchantShop.lat,lng:merchantResp.merchantShop.lng}
-        }
       }})
-    } catch (e){
-      console.log(e);
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:1,msg:'获取骑手信息失败'})
+      return
     }
+    req = {addrId:orderResp.order.addrId}
+    var userAddrResp = await userApiGetUserAddrByAddrId(req,propagateZipkinHeaders(ctx))
+    req = {merchantShopId: orderResp.order.merchantShopId}
+    var merchantResp = await merchantApiGetMerchantShopByMerchantShopId(req,propagateZipkinHeaders(ctx))
+    req = {deliveryId: orderResp.order.deliveryId}
+    var deliveryResp = await deliveryApiGetDeliveryLocation(req,propagateZipkinHeaders(ctx))
+    ctx.body = JSON.stringify({code:0,data:{
+      orderInfo:{state:orderResp.order.state,subState:orderResp.order.subState},
+      poi:{
+        userAddrLngLat:{lat:userAddrResp.addr.lat,lng:userAddrResp.addr.lng},
+        deliveryLngLat:{lat:deliveryResp.location.lat,lng:deliveryResp.location.lng},
+        merchantLngLat:{lat:merchantResp.merchantShop.lat,lng:merchantResp.merchantShop.lng}
+      }
+    }})
 })
 
-router.post('/enduser/set_deliveried', async ctx => {
+router.post('/set_deliveried', async ctx => {
     var body = ctx.request.body;
     var jsonObj = JSON.parse(body);
-    try {
-      var req = {userId: ctx.jwt.userId, orderId: jsonObj.orderId};
-      var orderResp = await orderApiUserSetDeliveried(req,propagateZipkinHeaders(ctx))
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:0,data:orderResp})
-    } catch (e){
-      console.log(e);
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:1,msg:'设置已完成失败'})
-    }
+    var req = {userId: ctx.jwt.userId, orderId: jsonObj.orderId};
+    var orderResp = await orderApiUserSetDeliveried(req,propagateZipkinHeaders(ctx))
+    ctx.body = JSON.stringify({code:0,data:orderResp})
 })
 
-router.post('/enduser/set_canceled', async ctx => {
+router.post('/set_canceled', async ctx => {
     var body = ctx.request.body;
     var jsonObj = JSON.parse(body);
-    try {
-      var req = {userId: ctx.jwt.userId, orderId: jsonObj.orderId};
-      var orderResp = await orderApiUserSetCanceled(req,propagateZipkinHeaders(ctx))
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:0,data:orderResp})
-    } catch (e){
-      console.log(e);
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:1,msg:'设置取消失败'})
-    }
+    var req = {userId: ctx.jwt.userId, orderId: jsonObj.orderId};
+    var orderResp = await orderApiUserSetCanceled(req,propagateZipkinHeaders(ctx))
+    ctx.body = JSON.stringify({code:0,data:orderResp})
 })
 
-router.post('/enduser/activity/enabled', async ctx => {
+router.post('/activity/enabled', async ctx => {
     var body = ctx.request.body;
     var jsonObj = JSON.parse(body);
-    try {
-      var req = {activityId: jsonObj.activityId};
-      var activityResp = await activityApiActivityEnabled(req,propagateZipkinHeaders(ctx))
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:0,data:activityResp})
-    } catch (e){
-      console.log(e);
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:1,msg:'获取活动状态失败'})
-    }
+    var req = {activityId: jsonObj.activityId};
+    var activityResp = await activityApiActivityEnabled(req,propagateZipkinHeaders(ctx))
+    ctx.body = JSON.stringify({code:0,data:activityResp})
 })
 
-router.post('/enduser/activity1/set_recommender', async ctx => {
+router.post('/activity1/set_recommender', async ctx => {
     var body = ctx.request.body;
     var jsonObj = JSON.parse(body);
-    try {
-      var req = {userId: ctx.jwt.userId, recommenderId: jsonObj.recommenderId};
-      var activityResp = await activityApiActivity1SetRecommender(req,propagateZipkinHeaders(ctx))
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:0,data:activityResp})
-    } catch (e){
-      console.log(e);
-      ctx.set("Content-Type", "application/json")
-      ctx.body = JSON.stringify({code:1,msg:'设置推荐人失败'})
-    }
+    var req = {userId: ctx.jwt.userId, recommenderId: jsonObj.recommenderId};
+    var activityResp = await activityApiActivity1SetRecommender(req,propagateZipkinHeaders(ctx))
+    ctx.body = JSON.stringify({code:0,data:activityResp})
 })
 
 function propagateZipkinHeaders(ctx) {
@@ -503,6 +384,10 @@ function propagateZipkinHeaders(ctx) {
       if(key.startsWith('x-b3-')){
         meta.add(key, ctx.header[key])
       }
+    }
+    var endpointId = ctx.cookies.get('endpoint-id')
+    if(endpointId){
+        meta.add('baggage-endpoint-id', endpointId)
     }
     return meta
 }

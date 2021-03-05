@@ -6,5 +6,6 @@
   "userAddr":"localhost:18083",
   "deliveryAddr":"localhost:18089",
   "activityAddr":"localhost:18097",
-  "enduser_secret":"cdt-enduser-test"
+  "enduser_secret":"cdt-enduser-test",
+  "sentryDsn":"http://767d30db29f94ed4924bb21377cd1dea@81.70.104.137:38080/12"
 }

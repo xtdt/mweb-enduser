@@ -1,5 +1,6 @@
 const Koa = require('koa');
 const app = new Koa();
+const Sentry = require("@sentry/node");
 
 const bodyParser = require('koa-bodyparser');
 app.use(bodyParser({
@@ -8,6 +9,16 @@ app.use(bodyParser({
   },
   enableTypes: ['text'],
 }));
+
+app.use(async (ctx, next) => {
+  try {
+    ctx.set("Content-Type", "application/json")
+    await next();
+  } catch (err) {
+    ctx.body = JSON.stringify({code:1,msg:err.message})
+    ctx.app.emit('error', err, ctx);
+  }
+});
 
 var jwt = require('jsonwebtoken');
 const allowpage = ['/mweb/enduser/svcno/jsapi_ticket','/mweb/enduser/svcno/login','/mweb/enduser/search_merchant_shop']
@@ -26,7 +37,7 @@ function loginFilter(ctx) {
            ctx.jwt = decoded
            console.log("decoded: ",decoded)
        } catch (e){
-           console.log("failed to valid jwt: ",e)
+           // console.log("failed to valid jwt: ",e)
            return false
        }
     }
@@ -57,4 +68,14 @@ const config = require('./config.json');
 app.listen(config.port, () => {
     console.log("server started,port:"+config.port);
 })
+
+Sentry.init({ dsn: config.sentryDsn, tracesSampleRate: 1.0});
+app.on("error", (err, ctx) => {
+  Sentry.withScope(function(scope) {
+    scope.addEventProcessor(function(event) {
+      return Sentry.Handlers.parseRequest(event, ctx.request);
+    });
+    Sentry.captureException(err);
+  });
+});
 
