@@ -27,7 +27,7 @@ var orderPackageDefinition = protoLoader.loadSync(
      oneofs: true
     });
 var orderProtoDescriptor = grpc.loadPackageDefinition(orderPackageDefinition);
-var order = orderProtoDescriptor.xtdt.order;
+var order = orderProtoDescriptor.com.caidantuan.order;
 var orderApi = new order.OrderApi(config.orderAddr, grpc.credentials.createInsecure());
 
 var MERCHANT_PROTO_PATH = __dirname + '/proto/merchant/merchant_api.proto';
@@ -40,7 +40,7 @@ var merchantPackageDefinition = protoLoader.loadSync(
      oneofs: true
     });
 var merchantProtoDescriptor = grpc.loadPackageDefinition(merchantPackageDefinition);
-var merchant = merchantProtoDescriptor.xtdt.merchant;
+var merchant = merchantProtoDescriptor.com.caidantuan.merchant;
 var merchantApi = new merchant.MerchantApi(config.merchantAddr, grpc.credentials.createInsecure());
 
 var WECHAT_PROTO_PATH = __dirname + '/proto/wechat/wechat_api.proto';
@@ -53,7 +53,7 @@ var wechatPackageDefinition = protoLoader.loadSync(
      oneofs: true
     });
 var wechatProtoDescriptor = grpc.loadPackageDefinition(wechatPackageDefinition);
-var wechat = wechatProtoDescriptor.xtdt.wechat;
+var wechat = wechatProtoDescriptor.com.caidantuan.wechat;
 var wechatApi = new wechat.WechatApi(config.wechatAddr, grpc.credentials.createInsecure());
 
 var USER_PROTO_PATH = __dirname + '/proto/user/user_api.proto';
@@ -66,7 +66,7 @@ var userPackageDefinition = protoLoader.loadSync(
      oneofs: true
     });
 var userProtoDescriptor = grpc.loadPackageDefinition(userPackageDefinition);
-var user = userProtoDescriptor.xtdt.user;
+var user = userProtoDescriptor.com.caidantuan.user;
 var userApi = new user.UserApi(config.userAddr, grpc.credentials.createInsecure());
 
 var DELIVERY_PROTO_PATH = __dirname + '/proto/delivery/delivery_api.proto';
@@ -79,7 +79,7 @@ var deliveryPackageDefinition = protoLoader.loadSync(
      oneofs: true
     });
 var deliveryProtoDescriptor = grpc.loadPackageDefinition(deliveryPackageDefinition);
-var delivery = deliveryProtoDescriptor.xtdt.delivery;
+var delivery = deliveryProtoDescriptor.com.caidantuan.delivery;
 var deliveryApi = new delivery.DeliveryApi(config.deliveryAddr, grpc.credentials.createInsecure());
 
 var ACTIVITY_PROTO_PATH = __dirname + '/proto/activity/activity_api.proto';
@@ -92,7 +92,7 @@ var activityPackageDefinition = protoLoader.loadSync(
      oneofs: true
     });
 var activityProtoDescriptor = grpc.loadPackageDefinition(activityPackageDefinition);
-var activity = activityProtoDescriptor.xtdt.activity;
+var activity = activityProtoDescriptor.com.caidantuan.activity;
 var activityApi = new activity.ActivityApi(config.activityAddr, grpc.credentials.createInsecure());
 
 
